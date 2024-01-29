@@ -1,6 +1,8 @@
 package dev.czechitas.java1.turtle.engine;
 
-import net.sevecek.util.*;
+import net.sevecek.util.ApplicationPublicException;
+import net.sevecek.util.ExceptionUtils;
+import net.sevecek.util.ThreadUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -16,6 +18,7 @@ public class Turtle {
     private static final double DEGREES_TO_RADIAN_RATIO = Math.PI / 180.0;
     private static final String TURTLE_SPRITE_FILE_NAME = "turtle.png";
     private static final Color DEFAULT_PEN_COLOR = new Color(70, 70, 140);
+    private static Raster backupRaster;
     private double x;
     private double y;
     private double angle;
@@ -132,12 +135,12 @@ public class Turtle {
         return board.getSpeed();
     }
 
+    // -------------------------------------------------------------------------
+
     public void setSpeed(double newValue) {
         testPause();
         board.setSpeed(newValue);
     }
-
-    // -------------------------------------------------------------------------
 
     private void testPause() {
         while (board.getShouldPause()) {
@@ -150,6 +153,8 @@ public class Turtle {
         this.y = newY;
     }
 
+    // -------------------------------------------------------------------------
+
     private void setAngleInternal(double newAngle) {
         if (newAngle > 360.0) {
             newAngle = newAngle % 360.0;
@@ -159,8 +164,6 @@ public class Turtle {
         }
         angle = newAngle;
     }
-
-    // -------------------------------------------------------------------------
 
     private void animateRotation(double originalAngle, double newAngle) {
         if (Math.abs(originalAngle - newAngle) > 25.0) {
@@ -189,6 +192,8 @@ public class Turtle {
         }
         uiDrawRotatedTurtle(newAngle);
     }
+
+    // -------------------------------------------------------------------------
 
     private void animateDrawing(double oldX, double oldY, double angle, double length) {
         double targetX = oldX + Math.cos((angle - 90.0) * DEGREES_TO_RADIAN_RATIO) * length;
@@ -230,8 +235,6 @@ public class Turtle {
         }
     }
 
-    // -------------------------------------------------------------------------
-
     private void uiInitialize() {
         Board.invokeAndWait(() -> {
             ImageIcon icon = new ImageIcon(turtleSprite);
@@ -266,8 +269,6 @@ public class Turtle {
                     (int) (newY - turtleSprite.getHeight() / 2));
         });
     }
-
-    private static Raster backupRaster;
 
     private class UiLineAnimator {
 

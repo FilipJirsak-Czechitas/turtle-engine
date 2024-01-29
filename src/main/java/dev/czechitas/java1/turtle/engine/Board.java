@@ -1,7 +1,7 @@
 package dev.czechitas.java1.turtle.engine;
 
-import net.sevecek.util.*;
-import net.sevecek.util.swing.*;
+import net.sevecek.util.ExceptionUtils;
+import net.sevecek.util.swing.SwingExceptionHandler;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -26,17 +26,10 @@ public class Board {
     private double speed = 1.0;
     private double rotationSpeed = 1.0;
     private boolean shouldPause;
-
-    public static Board getInstance(Thread thread) {
-        threads.add(thread);
-        return instance;
-    }
+    private JFrame window;
 
     //-------------------------------------------------------------------------
-
-    private JFrame window;
     private BufferedImage painting;
-
     private Board() {
         SwingExceptionHandler.install();
 
@@ -82,9 +75,22 @@ public class Board {
                 onWindowClosing();
             }
         });
-        window.setSize((int) (screenSize.width * 0.7), (int) (screenSize.height*0.7));
+        window.setSize((int) (screenSize.width * 0.7), (int) (screenSize.height * 0.7));
         window.setLocationRelativeTo(null);
         window.setVisible(true);
+    }
+
+    public static Board getInstance(Thread thread) {
+        threads.add(thread);
+        return instance;
+    }
+
+    public static void invokeAndWait(Runnable method) {
+        try {
+            SwingUtilities.invokeAndWait(method);
+        } catch (InterruptedException | InvocationTargetException e) {
+            throw ExceptionUtils.rethrowAsUnchecked(e);
+        }
     }
 
     public boolean getShouldPause() {
@@ -115,14 +121,6 @@ public class Board {
 
     public void add(JLabel sprite) {
         centerPanel.add(sprite);
-    }
-
-    public static void invokeAndWait(Runnable method) {
-        try {
-            SwingUtilities.invokeAndWait(method);
-        } catch (InterruptedException | InvocationTargetException e) {
-            throw ExceptionUtils.rethrowAsUnchecked(e);
-        }
     }
 
     public BufferedImage getPainting() {
